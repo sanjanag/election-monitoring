@@ -31,7 +31,7 @@ def compare_graph(Girrelevant,Grelevant,k):
 		outputFile.write("fraction common nodes: " + str(nodeCount/len(Grelevant.nodes())) + '\n')
 		outputFile.write("fraction common edges: " + str(edgeCount/len(Grelevant.edges())) + '\n')
 
-def score_tweet(outputFile, edges,G):
+def score_tweet(outputFile,edges,G):
 	score = 0
 	for edge in edges:
 		if edge in G.edges():
@@ -47,7 +47,7 @@ def write_output(Grelevant,Girrelevant,k):
 def get_batch(size,nextBatchAvailable):
 	return None;
 
-def update_graphs(batch, Grelevant, Girrelevant, k):
+def update_graphs(batch,Grelevant,Girrelevant,k):
 	for tweetDict in batch:
 		tokens = ug.tokenize(tweetDict['text'])
 		if tweetDict['status'] == 'NULL':
