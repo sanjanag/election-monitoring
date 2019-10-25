@@ -10,3 +10,4 @@ class Tweet:
 
     def __str__(self):
         return ', '.join([str(self.timestamp), self.text])
+

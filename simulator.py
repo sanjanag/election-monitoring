@@ -26,6 +26,14 @@ class Simulator:
         end = min(start + size, self.last_id)
         self.next_id = end
         batch_df = self.tweets_df.iloc[start:end]
-        records = batch_df.to_dict('r')
+        return self.convert(batch_df)
+
+    def convert(self, df):
+        records = df.to_dict('r')
         tweets = [Tweet(record) for record in records]
         return tweets
+
+    def get_all(self):
+        start = self.next_id
+        batch_df = self.tweets_df.iloc[start:]
+        return self.convert(batch_df)
