@@ -3,7 +3,11 @@ class RankingEngine:
         self.list_k = k
         pass
 
-    def rank(self, rscore, irscore, act_labels):
+    def rank(self, batch):
+        for tweet in batch:
+            tweet.setrankscore(tweet.getrscore() - tweet.getirscore())
+        rankedBatch = sorted(batch, key = itemgetter(rankscore))
+        #assume they are ranked
         self.act_labels = act_labels
         self.ranked_labels = []  # todo
         rankings = []
