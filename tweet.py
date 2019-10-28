@@ -2,7 +2,8 @@ class Tweet:
     def __init__(self, args):
         self.text = args['report']
         self.timestamp = args['authored_at']
-        self.status = args['status']
+        self.status = 'Y' if isinstance(args['status'], str) else None
+        self.label = 1 if self.status == 'Y' else 0
         # can use more args if required
 
     def __repr__(self):

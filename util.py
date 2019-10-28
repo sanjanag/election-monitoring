@@ -78,6 +78,8 @@ class Util:
             outputFile.write("fraction common edges: " + str(
                 edgeCount / len(Grelevant.edges())) + '\n')
 
+
+
     @staticmethod
     def write_output(Grelevant, Girrelevant, k):
         Util.compare_graph(Girrelevant, Grelevant, k)
