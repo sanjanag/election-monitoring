@@ -1,45 +1,47 @@
+import operator
+
+
 class RankingEngine:
     def __init__(self, k):
         self.list_k = k
         pass
 
-    def rank(self, batch):
+    @staticmethod
+    def rank(batch):
         for tweet in batch:
-            tweet.setrankscore(tweet.getrscore() - tweet.getirscore())
-        rankedBatch = sorted(batch, key = itemgetter(rankscore))
-        #assume they are ranked
-        self.act_labels = act_labels
-        self.ranked_labels = []  # todo
-        rankings = []
-        return rankings
+            tweet.rank_score = tweet.rscore - tweet.irscore
+        ranked_batch = sorted(batch, key=operator.attrgetter('rank_score'),
+                              reverse=True)
+        return ranked_batch
 
-    def eval(self):
-        total_relevant, total_irrelevant = self.count_labels(self.act_labels)
-        return self.calc_sensitivity(total_relevant), self.calc_specificity(
-            total_irrelevant)
+    @staticmethod
+    def eval(ranked_batch):
+        total_relevant, total_irrelevant = RankingEngine.count_labels(
+            ranked_batch)
+        metrics = {}
+        for k in range(10, len(ranked_batch), 10):
+            num_relevant, num_irrelevant = RankingEngine.count_labels(
+                ranked_batch[:k])
+            metrics[k] = [
+                RankingEngine.sensitivity(num_relevant, total_relevant),
+                RankingEngine.specificity(num_irrelevant, total_irrelevant)]
+        return metrics
 
-    def count_labels(self, labels):
+    @staticmethod
+    def count_labels(tweets):
         num_relevant = 0
-        num_irrlevant = 0
-        for label in labels:
-            if label == 1:
+        num_irrelevant = 0
+        for tweet in tweets:
+            if tweet.label == 1:
                 num_relevant += 1
             else:
-                num_irrlevant += 1
-        return num_relevant, num_irrlevant
+                num_irrelevant += 1
+        return num_relevant, num_irrelevant
 
-    def calc_sensitivity(self, total_relevant):
-        metrics = []
-        for k in self.list_k:
-            num_relevant, num_irrlevant = self.count_labels(
-                self.ranked_labels[:k])
-            metrics.append(num_relevant / total_relevant)
-        return metrics
+    @staticmethod
+    def sensitivity(num_relevant, total_relevant):
+        return num_relevant / total_relevant
 
-    def calc_specificity(self, total_irrelevant):
-        metrics = []
-        for k in self.list_k:
-            num_relevant, num_irrlevant = self.count_labels(
-                self.ranked_labels[:k])
-            metrics.append(num_irrlevant / total_irrelevant)
-        return metrics
+    @staticmethod
+    def specificity(num_irrelevant, total_irrelevant):
+        return num_irrelevant / total_irrelevant
