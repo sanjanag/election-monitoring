@@ -40,15 +40,10 @@ class Util:
     def tokenize(tweet):
         tweet = re.sub(r'[^\x00-\x7f]', r'', tweet)  # remove non-ascii chars
         tokens = tweet.split()  # split about empty spaces
-        tokens = [x.lower() for x in tokens if Util.is_valid(x)]  # remove
-        # URLs,
-        # @ mentions etc.
-        tokens = Util.sanitize(
-            tokens)  # remove random characters and punctions, #hash should
-        # not be removed
+        tokens = [x.lower() for x in tokens if Util.is_valid(x)]  # remove URLs, @ mentions etc.
+        tokens = Util.sanitize(tokens)  # remove random characters and punctions, #hash should not be removed
         tokens = [x for x in tokens if not x in stopWords]  # remove stop words
-        tokens = list(OrderedDict.fromkeys(
-            tokens))  # remove duplicates, while maintaining order
+        tokens = list(OrderedDict.fromkeys(tokens))  # remove duplicates, while maintaining order
         # print(tweet)
         # print(tokens)
         return tokens
@@ -62,7 +57,7 @@ class Util:
 
     @staticmethod
     def compare_graph(Girrelevant, Grelevant, k):
-        with open('comparison-' + str(k) + '.txt', 'w') as outputFile:
+        with open('logs/comparison-' + str(k) + '.txt', 'w') as outputFile:
             nodeCount = 0
             edgeCount = 0
             for node in Grelevant.nodes():
@@ -83,5 +78,5 @@ class Util:
     @staticmethod
     def write_output(Grelevant, Girrelevant, k):
         Util.compare_graph(Girrelevant, Grelevant, k)
-        nx.write_edgelist(Grelevant, 'relevant-edges-' + str(k) + '.txt')
-        nx.write_edgelist(Girrelevant, 'irrelevant-edges-' + str(k) + '.txt')
+        nx.write_edgelist(Grelevant, 'logs/relevant-edges-' + str(k) + '.txt')
+        nx.write_edgelist(Girrelevant, 'logs/irrelevant-edges-' + str(k) + '.txt')
