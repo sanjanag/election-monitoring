@@ -12,3 +12,5 @@ pruning-2.txt
 relevant-edges-1.txt
 relevant-edges-2.txt
 scoring.txt
+logs
+*.pyc
