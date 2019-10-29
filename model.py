@@ -2,67 +2,110 @@ from classifier import Classifier
 from graph import Graph
 from ranking_engine import RankingEngine
 from simulator import Simulator
-
-
+from util import Util
+import json
 class Model():
-    def __init__(self, stream_file='test.csv', init_size=2000, test_size=100, \
-                 prune_interval=200, approach='RANK', k=[10, 100, 500]):
+    def __init__(self, stream_file='test.csv', init_size=200,
+                 batch_size=200, \
+                 prune_interval=200, approach='RANK'):
         self.gr = Graph()
         self.gir = Graph()
         self.init_size = init_size
-        self.test_size = test_size
+        self.batch_size = batch_size
         self.prune_interval = prune_interval
-        self.age = 1
+        self.age = 0
         self.simulator = Simulator(stream_file)
         self.approach = approach
         self.classifier = Classifier()
-        self.ranking_engine = RankingEngine(k)
         self.results = []
-        self.k = k
 
     def add_batch(self, batch):
+        self.age += 1
         for i, tweet in enumerate(batch):
             if isinstance(tweet.status, str):
                 self.gr.add_tweet(tweet, self.age)
             else:
                 self.gir.add_tweet(tweet, self.age)
-            if i % self.prune_interval == 0:
-                self.gir.prune_edges(self.age)
-                self.age += 1
-                # if self.gr.number_of_nodes() > 0:
-                #     Util.write_output(gir, gr, curr_age)
+        self.prune_graph()
+        Util.write_output(self.gr.graph,self.gir.graph,self.age)
+
+    def prune_graph(self):
+        if self.age > 1:
+            print("Pruning edges") #######log statement
+            self.gir.prune_edges(self.age)
 
     def initialize(self):
-        init_batch = self.simulator.get_next_batch(2000)
+        init_batch = self.simulator.get_next_batch(self.init_size)
+        print("Adding initial batch to the graph") #######log statement
         self.add_batch(init_batch)
 
-    def score_batch(self, batch):
-        rscore = []
-        irscore = []
-        for tweet in batch:
-            rscore.append(self.gr.score(tweet))
-            irscore.append(self.gir.score(tweet))
-        return rscore, irscore
+    def score_tweet(self, tweet):
+        # with open('scoring-' + str(self.age) + '.txt','a') as outputFile:
+        # outputFile.write(tweet.text + '\n') #######log statement
+        edges = Graph.get_edges(tweet)
+        if len(edges) == 0:
+            # outputFile.write("Tweet with no edges, will be ignored for scoring\n") #######log statement
+            return    
+        edgerscore = 0
+        edgeirscore = 0
+        for edge in edges:
+            rscore = 0
+            irscore = 0
+            if edge in self.gr.graph.edges():
+                rscore = self.gr.graph[edge[0]][edge[1]]['weight']
+            else:
+                rscore = 0
+            if edge in self.gir.graph.edges():
+                irscore = self.gir.graph[edge[0]][edge[1]]['weight']
+            else: 
+                irscore = 0
+            if not rscore == 0 or not irscore == 0:
+                edgerscore += rscore/(rscore+irscore)
+                edgeirscore += irscore/(rscore+irscore)
+            # outputFile.write("Edge: " + ','.join(edge) + " Rscore: " + str(rscore) + " IRscore: " + str(irscore) + '\n') #######log statement
+        # outputFile.write("Rscore: " + str(edgerscore) + " IRscore: " + str(edgeirscore) + "\n") #######log statement
+        tweet.rscore = edgerscore/len(edges)
+        tweet.irscore = edgeirscore/len(edges)
 
-    def get_classifier_metrics(self, rscore, irscore, act_labels):
-        self.classifier.predict(rscore, irscore, act_labels)
+
+    def score_batch(self, batch):
+        for tweet in batch:
+            self.score_tweet(tweet)
+
+    def get_classifier_metrics(self, batch):
+        self.classifier.predict(batch)
         return self.classifier.eval()
 
-    def get_ranking_metrics(self, rscore, irscore, act_labels):
-        self.ranking_engine.rank(rscore, irscore, act_labels)
-        return self.ranking_engine.eval()
+    def get_ranking_metrics(self, batch, age):
+        ranked_batch = RankingEngine.rank(batch, age)
+        return RankingEngine.eval(ranked_batch, age)
 
     def run(self):
+        # j = 0
         while self.simulator.has_next_batch():
-            batch = self.simulator.get_next_batch(self.test_size)
-            rscore, irscore = self.score_batch(batch)
-            act_labels = [tweet.label for tweet in batch]
+            # j+=1
+            # print(j)
+            print("Current model age is: ",self.age) #######log statement
+            print("Received a new batch") #######log statement
+            batch = self.simulator.get_next_batch(self.batch_size)
+            print("First step: scoring the batch") #######log statement
+            self.score_batch(batch)
             if self.approach == 'RANK':
-                batch_results = self.get_ranking_metrics(rscore,
-                                                         irscore, act_labels)
+                print("Getting ranking metrics") #######log statement
+                batch_results = self.get_ranking_metrics(batch, self.age)
             else:
-                batch_results = self.get_classifier_metrics(rscore,
-                                                            irscore,
-                                                            act_labels)
+                batch_results = self.get_classifier_metrics(batch)
+            # print(batch_results)
             self.results.append(batch_results)
+            # if j > 1:
+                # break
+            print("Second step: adding the new batch") #######log statement
             self.add_batch(batch)
+
+if __name__ == '__main__':
+    model = Model()
+    print("Initializing the model with params: " + json.dumps(model.__dict__, default=str)) #######log statement
+    model.initialize()
+    with open('logs/ranking-metrics.txt','w') as outputFile:
+        outputFile.write('\n')
+    model.run()

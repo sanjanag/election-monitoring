@@ -31,7 +31,7 @@ class Graph:
         edge['weight'] += 1
 
     def prune_edges(self, curr_age):
-        with open("pruning-" + str(curr_age) + '.txt', 'w') as outputFile:
+        with open("logs/pruning-" + str(curr_age) + '.txt', 'w') as outputFile:
             allEdges = list(self.graph.edges())
             for edge in allEdges:
                 if self.graph[edge[0]][edge[1]]['weight'] == 1 and self.graph[
