@@ -29,17 +29,17 @@ class RankingEngine:
                 ranked_batch)
             outputFile.write("New batch, age is: " + str(age) + " Batch contains " + str(total_relevant) + " relevant tweets\n")
             if (total_relevant == 0):
-                outputFile.write("Batch contains no relevant tweets, skipping metric analysis")
+                outputFile.write("Batch contains no relevant tweets, skipping metric analysis\n")
                 return []
             metrics = {}
-            for k in range(10, len(ranked_batch), 10):
+            for k in range(10, len(ranked_batch)+1, 10):
                 num_relevant, num_irrelevant = RankingEngine.count_labels(
                     ranked_batch[:k])
                 metrics[k] = [
                     RankingEngine.recall(num_relevant, total_relevant, k),
                     RankingEngine.specificity(num_irrelevant, total_irrelevant)]
                 outputFile.write("Age: " + str(age) + " K: " + str(k) + " Recall: " + str(metrics[k][0]) + '\n')
-                if metrics[k][0] == 1.0:
+                if metrics[k][0] == 1.0 and k > total_relevant:
                     break
             return metrics
 

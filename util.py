@@ -68,10 +68,16 @@ class Util:
                 if edge in Girrelevant.edges():
                     edgeCount += 1
                     outputFile.write("Common edge: " + ','.join(edge) + '\n')
-            outputFile.write("fraction common nodes: " + str(
-                nodeCount / len(Grelevant.nodes())) + '\n')
-            outputFile.write("fraction common edges: " + str(
-                edgeCount / len(Grelevant.edges())) + '\n')
+            if len(Grelevant.nodes()) > 0:
+                outputFile.write("fraction common nodes: " + str(
+                    nodeCount / len(Grelevant.nodes())) + '\n')
+            else:
+                outputFile.write("fraction common nodes: 0, as relevant graph is empty\n")
+            if len(Grelevant.edges()) > 0:
+                outputFile.write("fraction common edges: " + str(
+                    edgeCount / len(Grelevant.edges())) + '\n')
+            else: 
+                outputFile.write("fraction common edges: 0, as relevant graph is empty\n")
 
 
 
