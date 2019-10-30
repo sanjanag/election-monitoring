@@ -13,4 +13,5 @@ relevant-edges-1.txt
 relevant-edges-2.txt
 scoring.txt
 logs
+complete-*
 *.pyc

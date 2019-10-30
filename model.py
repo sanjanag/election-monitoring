@@ -42,7 +42,8 @@ class Model():
     def score_tweet(self, tweet):
         # with open('scoring-' + str(self.age) + '.txt','a') as outputFile:
         # outputFile.write(tweet.text + '\n') #######log statement
-        edges = Graph.get_edges(tweet)
+        tweet.set_edges()
+        edges = tweet.edges
         if len(edges) == 0:
             # outputFile.write("Tweet with no edges, will be ignored for scoring\n") #######log statement
             return    
@@ -81,7 +82,7 @@ class Model():
         return RankingEngine.eval(ranked_batch, age)
 
     def run(self):
-        # j = 0
+        j = 0
         while self.simulator.has_next_batch():
             # j+=1
             # print(j)
@@ -98,12 +99,13 @@ class Model():
             # print(batch_results)
             self.results.append(batch_results)
             # if j > 1:
-                # break
+            #     break
             print("Second step: adding the new batch") #######log statement
             self.add_batch(batch)
 
 if __name__ == '__main__':
-    model = Model()
+    model = Model(stream_file='tweets_processing/data/tweets.csv',init_size=200,
+                 batch_size=200,)
     print("Initializing the model with params: " + json.dumps(model.__dict__, default=str)) #######log statement
     model.initialize()
     with open('logs/ranking-metrics.txt','w') as outputFile:
