@@ -7,6 +7,8 @@ class Graph:
         self.graph = nx.Graph()
 
     def add_tweet(self, tweet, k):
+        if len(tweet.edges) == 0:
+            tweet.set_edges()
         new_edges = tweet.edges
         self.add_edges(new_edges, k)
 

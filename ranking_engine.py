@@ -1,25 +1,29 @@
 import operator
 import json
-
+import csv
 class RankingEngine:
     def __init__(self, k):
         self.list_k = k
         pass
 
     @staticmethod
-    def get_score(tweet):
-        return tweet.rscore - tweet.irscore
+    def get_score(tweet,baseline):
+        if baseline == "b1":
+            return tweet.rscore - tweet.irscore ######## B1
+        elif baseline == 'b2':
+            return tweet.rscore ######### B2
 
     @staticmethod
-    def rank(batch, age):
-        with open('logs/ranked-list-' + str(age) + '.txt', 'w') as outputFile:
+    def rank(batch, age, baseline):
+        with open('logs/ranked-list-' + str(age) + '.csv', 'w') as outputFile:
             for tweet in batch:
-                tweet.rank_score = RankingEngine.get_score(tweet)
+                tweet.rank_score = RankingEngine.get_score(tweet,baseline)
             ranked_batch = sorted(batch, key=operator.attrgetter('rank_score'),
                                   reverse=True)
+            outputWriter = csv.writer(outputFile)
+            outputWriter.writerow(["Text","timestamp","status","rank_score","rscore","irscore",'edges'])
             for tweet in ranked_batch:
-                outputFile.write(json.dumps(tweet.__dict__, default=str))
-                outputFile.write('\n')
+                outputWriter.writerow([tweet.text,tweet.timestamp,tweet.status,tweet.rank_score,tweet.rscore,tweet.irscore,tweet.edges])
             return ranked_batch
 
     @staticmethod
@@ -32,7 +36,7 @@ class RankingEngine:
                 outputFile.write("Batch contains no relevant tweets, skipping metric analysis\n")
                 return []
             metrics = {}
-            for k in range(10, len(ranked_batch)+1, 10):
+            for k in range(1000, len(ranked_batch)+1, 1000):
                 num_relevant, num_irrelevant = RankingEngine.count_labels(
                     ranked_batch[:k])
                 metrics[k] = [

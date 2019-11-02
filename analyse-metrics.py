@@ -1,6 +1,7 @@
 import csv
 
-inputFolders = ['complete-b1-5000/', 'complete-b1-10000/', 'complete-b1-20000/']
+# inputFolders = ['complete-b1-5000/', 'complete-b1-10000/', 'complete-b1-20000/']
+inputFolders = ['logs/']
 
 for folder in inputFolders:
 	with open(folder + 'ranking-metrics.txt','r') as inputFile, open(folder + 'plot-metrics.csv','w') as outputFile:
