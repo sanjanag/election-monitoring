@@ -4,10 +4,15 @@ from ranking_engine import RankingEngine
 from simulator import Simulator
 from util import Util
 import json
+import sys
+import os
+import shutil
+
+#usage python3 model.py <batchsize> <baseline>
 class Model():
     def __init__(self, stream_file='test.csv', init_size=200,
                  batch_size=200, \
-                 prune_interval=200, approach='RANK'):
+                 prune_interval=200, approach='RANK',baseline='b1'):
         self.gr = Graph()
         self.gir = Graph()
         self.init_size = init_size
@@ -18,6 +23,8 @@ class Model():
         self.approach = approach
         self.classifier = Classifier()
         self.results = []
+        self.baseline = baseline
+        self.outputDirectory = outputDirectory
 
     def add_batch(self, batch):
         self.age += 1
@@ -78,7 +85,7 @@ class Model():
         return self.classifier.eval()
 
     def get_ranking_metrics(self, batch, age):
-        ranked_batch = RankingEngine.rank(batch, age)
+        ranked_batch = RankingEngine.rank(batch, age, self.baseline)
         return RankingEngine.eval(ranked_batch, age)
 
     def run(self):
@@ -103,11 +110,20 @@ class Model():
             print("Second step: adding the new batch") #######log statement
             self.add_batch(batch)
 
+
 if __name__ == '__main__':
-    model = Model(stream_file='tweets_processing/data/tweets.csv',init_size=200,
-                 batch_size=200,)
-    print("Initializing the model with params: " + json.dumps(model.__dict__, default=str)) #######log statement
-    model.initialize()
+    if os.path.exists('logs/'):
+        shutil.rmtree('logs/')
+    os.makedirs('logs/')
     with open('logs/ranking-metrics.txt','w') as outputFile:
         outputFile.write('\n')
+    
+    batchsize = sys.argv[1]
+    baseline = sys.argv[2]
+    outputDirectory = "complete-" + baseline + "-" + str(batchsize)
+    
+    model = Model(stream_file='tweets_processing/data/tweets.csv',init_size=int(batchsize),
+                 batch_size=int(batchsize),baseline=baseline)
+    print("Initializing the model with params: " + json.dumps(model.__dict__, default=str)) #######log statement
+    model.initialize()
     model.run()
