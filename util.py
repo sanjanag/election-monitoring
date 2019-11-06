@@ -17,7 +17,7 @@ class Util:
             if edge in G.edges():
                 outputFile.write(','.join(edge) + " : " + str(
                     G[edge[0]][edge[1]]['weight']) + '\n')
-                score += G[edge[0]][edge[1]]['weight']
+                score += sum(G[edge[0]][edge[1]]['weight'].values())
         return score
 
     @staticmethod
