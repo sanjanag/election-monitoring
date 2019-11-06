@@ -16,18 +16,23 @@ class Graph:
         for edge in edges:
             if edge not in self.graph.edges():
                 self.graph.add_edge(edge[0], edge[1])
-                self.graph[edge[0]][edge[1]]['weight'] = 0
-            self.update_weight(self.graph[edge[0]][edge[1]])
+                self.graph[edge[0]][edge[1]]['weight'] = {}
+            self.update_weight(self.graph[edge[0]][edge[1]],k)
             self.graph[edge[0]][edge[1]]['time_interval'] = k
 
-    def update_weight(self, edge):
-        edge['weight'] += 1
+    def update_weight(self, edge, k):
+        if not k in edge['weight'].keys():
+            edge['weight'][k] = 0
+        edge['weight'][k] += 1
+
+    def decay_edges(self):
+        # perform the decay
 
     def prune_edges(self, curr_age):
         with open("logs/pruning-" + str(curr_age) + '.txt', 'w') as outputFile:
             allEdges = list(self.graph.edges())
             for edge in allEdges:
-                if self.graph[edge[0]][edge[1]]['weight'] == 1 and self.graph[
+                if sum(self.graph[edge[0]][edge[1]]['weight'].values()) == 1 and self.graph[
                     edge[0]][
                     edge[1]][
                     'time_interval'] == curr_age - 1:

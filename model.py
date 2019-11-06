@@ -34,6 +34,7 @@ class Model():
             else:
                 self.gir.add_tweet(tweet, self.age)
         self.prune_graph()
+        self.decay_edges()
         Util.write_output(self.gr.graph,self.gir.graph,self.age)
 
     def prune_graph(self):
@@ -60,11 +61,11 @@ class Model():
             rscore = 0
             irscore = 0
             if edge in self.gr.graph.edges():
-                rscore = self.gr.graph[edge[0]][edge[1]]['weight']
+                rscore = sum(self.gr.graph[edge[0]][edge[1]]['weight'].values())
             else:
                 rscore = 0
             if edge in self.gir.graph.edges():
-                irscore = self.gir.graph[edge[0]][edge[1]]['weight']
+                irscore = sum(self.gir.graph[edge[0]][edge[1]]['weight'].values())
             else: 
                 irscore = 0
             if not rscore == 0 or not irscore == 0:
