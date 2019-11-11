@@ -34,7 +34,7 @@ class Model():
             else:
                 self.gir.add_tweet(tweet, self.age)
         self.prune_graph()
-        self.decay_edges()
+        # self.decay_edges()            # commented this out since current logic doesnt require iterative decay updates
         Util.write_output(self.gr.graph,self.gir.graph,self.age)
 
     def prune_graph(self):
