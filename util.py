@@ -10,15 +10,15 @@ stopWords = set(stopwords.words('english'))
 
 
 class Util:
-    @staticmethod
-    def score_tweet(outputFile, edges, G):
-        score = 0
-        for edge in edges:
-            if edge in G.edges():
-                outputFile.write(','.join(edge) + " : " + str(
-                    G[edge[0]][edge[1]]['weight']) + '\n')
-                score += sum(G[edge[0]][edge[1]]['weight'].values())
-        return score
+    # @staticmethod
+    # def score_tweet(outputFile, edges, G):
+    #     score = 0
+    #     for edge in edges:
+    #         if edge in G.edges():
+    #             outputFile.write(','.join(edge) + " : " + str(
+    #                 G[edge[0]][edge[1]]['weight']) + '\n')
+    #             score += sum(G[edge[0]][edge[1]]['weight'].values())
+    #     return score
 
     @staticmethod
     def sanitize(tokens):

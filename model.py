@@ -8,11 +8,11 @@ import sys
 import os
 import shutil
 
-#usage python3 model.py <batchsize> <baseline>
+#usage python3 model.py <batchsize> <baseline> <decayflag>
 class Model():
     def __init__(self, stream_file='test.csv', init_size=200,
                  batch_size=200, \
-                 prune_interval=200, approach='RANK',baseline='b1'):
+                 prune_interval=200, approach='RANK',baseline='b1',decayflag=False):
         self.gr = Graph()
         self.gir = Graph()
         self.init_size = init_size
@@ -25,6 +25,7 @@ class Model():
         self.results = []
         self.baseline = baseline
         self.outputDirectory = outputDirectory
+        self.decayflag = decayflag
 
     def add_batch(self, batch):
         self.age += 1
@@ -35,7 +36,6 @@ class Model():
                 self.gir.add_tweet(tweet, self.age)
         self.prune_graph()
         # self.decay_edges()            # commented this out since current logic doesnt require iterative decay updates
-        Util.write_output(self.gr.graph,self.gir.graph,self.age)
 
     def prune_graph(self):
         if self.age > 1:
@@ -62,10 +62,22 @@ class Model():
             irscore = 0
             if edge in self.gr.graph.edges():
                 rscore = sum(self.gr.graph[edge[0]][edge[1]]['weight'].values())
+                # if not self.decayflag:
+                #     rscore = sum(self.gr.graph[edge[0]][edge[1]]['weight'].values())
+                # else:
+                #     rscore = self.gr.get_decay_value(edge, curr_age)
+                #     print('decay score ', rscore)
+                #     print('at age ', curr_age)
             else:
                 rscore = 0
             if edge in self.gir.graph.edges():
-                irscore = sum(self.gir.graph[edge[0]][edge[1]]['weight'].values())
+                if not self.decayflag == 'True':
+                    irscore = sum(self.gir.graph[edge[0]][edge[1]]['weight'].values())
+                else:
+                    irscore = self.gir.get_decay_value(edge, self.age)
+                    # print(edge)
+                    # print('decay score ', irscore)
+                    # print('at age ', self.age)
             else: 
                 irscore = 0
             if not rscore == 0 or not irscore == 0:
@@ -92,7 +104,7 @@ class Model():
     def run(self):
         j = 0
         while self.simulator.has_next_batch():
-            # j+=1
+            j+=1
             # print(j)
             print("Current model age is: ",self.age) #######log statement
             print("Received a new batch") #######log statement
@@ -110,6 +122,8 @@ class Model():
             #     break
             print("Second step: adding the new batch") #######log statement
             self.add_batch(batch)
+            # if j >1:
+            #     break
 
 
 if __name__ == '__main__':
@@ -121,10 +135,13 @@ if __name__ == '__main__':
     
     batchsize = sys.argv[1]
     baseline = sys.argv[2]
+    decayflag = sys.argv[3]
     outputDirectory = "complete-" + baseline + "-" + str(batchsize)
     
     model = Model(stream_file='tweets_processing/data/tweets.csv',init_size=int(batchsize),
-                 batch_size=int(batchsize),baseline=baseline)
+                 batch_size=int(batchsize),baseline=baseline,decayflag=decayflag)
     print("Initializing the model with params: " + json.dumps(model.__dict__, default=str)) #######log statement
     model.initialize()
     model.run()
+    Util.write_output(model.gr.graph,model.gir.graph,model.age)
+
