@@ -1,6 +1,8 @@
 import operator
 import json
 import csv
+import math
+
 class RankingEngine:
     def __init__(self, k):
         self.list_k = k
@@ -12,13 +14,25 @@ class RankingEngine:
             return tweet.rscore - tweet.irscore ######## B1
         elif baseline == 'b2':
             return tweet.rscore ######### B2
+        elif baseline == 'b3':
+            if tweet.rscore == 0:
+                return 0
+            elif tweet.irscore == 0:
+                print("What the fuck!!!!!")
+                return 0
+            return math.log(tweet.rscore/tweet.irscore)
+        elif baseline == 'b4':
+            return 0
 
     @staticmethod
     def rank(batch, age, baseline):
         with open('logs/ranked-list-' + str(age) + '.csv', 'w') as outputFile:
             for tweet in batch:
                 tweet.rank_score = RankingEngine.get_score(tweet,baseline)
-            ranked_batch = sorted(batch, key=operator.attrgetter('rank_score'),
+            if baseline == 'b4':
+                ranked_batch = sorted(batch, key= lambda tweet: (-tweet.rscore, tweet.irscore) )
+            else: 
+                ranked_batch = sorted(batch, key=operator.attrgetter('rank_score'),
                                   reverse=True)
             outputWriter = csv.writer(outputFile)
             outputWriter.writerow(["Text","timestamp","status","rank_score","rscore","irscore",'edges'])
