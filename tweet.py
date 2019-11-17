@@ -43,7 +43,8 @@ class Tweet:
             return []
 
         window_size = 1
+        edge_set = []
         for windowed_subtext in Util.get_windows(tokens, window_size):
-            edges = list(combinations(windowed_subtext, 2))
-            self.edges = edges
+            edge_set.append(list(combinations(windowed_subtext, 2)))
+        self.edges = edges
 
