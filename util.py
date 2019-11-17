@@ -56,6 +56,12 @@ class Util:
         return True
 
     @staticmethod
+    def get_windows(tokens, window_size):
+        windows = []
+        windows = [tokens[ (i - window_size) : (i + window_size + 1) ] for i in range(window_size, len(tokens) - window_size)]
+        return windows
+
+    @staticmethod
     def compare_graph(Girrelevant, Grelevant, k):
         with open('logs/comparison-' + str(k) + '.txt', 'w') as outputFile:
             nodeCount = 0
