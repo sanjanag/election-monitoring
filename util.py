@@ -57,7 +57,6 @@ class Util:
 
     @staticmethod
     def get_windows(tokens, window_size):
-        windows = []
         windows = [tokens[ (i - window_size) : (i + window_size + 1) ] for i in range(window_size, len(tokens) - window_size)]
         return windows
 
