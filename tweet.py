@@ -42,9 +42,12 @@ class Tweet:
             print("Found typeerror, tweet will be ignored")
             return []
 
-        window_size = 1
+        window_size = 2
         edge_set = []
         for windowed_subtext in Util.get_windows(tokens, window_size):
             edge_set.append(list(combinations(windowed_subtext, 2)))
+
+        edges = [i for sublist in edge_set for i in sublist]
+        edges = list(set(edges))
         self.edges = edges
 
