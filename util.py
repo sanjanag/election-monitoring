@@ -1,7 +1,10 @@
 import re
 from collections import OrderedDict
 
+import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
+import pandas as pd
 from nltk.corpus import stopwords
 
 punctuations = "!\"(),-./:;<=>?[\\]^_`{|}~'"
@@ -40,10 +43,14 @@ class Util:
     def tokenize(tweet):
         tweet = re.sub(r'[^\x00-\x7f]', r'', tweet)  # remove non-ascii chars
         tokens = tweet.split()  # split about empty spaces
-        tokens = [x.lower() for x in tokens if Util.is_valid(x)]  # remove URLs, @ mentions etc.
-        tokens = Util.sanitize(tokens)  # remove random characters and punctions, #hash should not be removed
+        tokens = [x.lower() for x in tokens if
+                  Util.is_valid(x)]  # remove URLs, @ mentions etc.
+        tokens = Util.sanitize(
+            tokens)  # remove random characters and punctions, #hash should
+        # not be removed
         tokens = [x for x in tokens if not x in stopWords]  # remove stop words
-        tokens = list(OrderedDict.fromkeys(tokens))  # remove duplicates, while maintaining order
+        tokens = list(OrderedDict.fromkeys(
+            tokens))  # remove duplicates, while maintaining order
         # print(tweet)
         # print(tokens)
         return tokens
@@ -57,7 +64,8 @@ class Util:
 
     @staticmethod
     def get_windows(tokens, window_size):
-        windows = [tokens[ (i - window_size) : (i + window_size + 1) ] for i in range(window_size, len(tokens) - window_size)]
+        windows = [tokens[(i - window_size): (i + window_size + 1)] for i in
+                   range(window_size, len(tokens) - window_size)]
         return windows
 
     @staticmethod
@@ -77,17 +85,40 @@ class Util:
                 outputFile.write("fraction common nodes: " + str(
                     nodeCount / len(Grelevant.nodes())) + '\n')
             else:
-                outputFile.write("fraction common nodes: 0, as relevant graph is empty\n")
+                outputFile.write(
+                    "fraction common nodes: 0, as relevant graph is empty\n")
             if len(Grelevant.edges()) > 0:
                 outputFile.write("fraction common edges: " + str(
                     edgeCount / len(Grelevant.edges())) + '\n')
-            else: 
-                outputFile.write("fraction common edges: 0, as relevant graph is empty\n")
-
-
+            else:
+                outputFile.write(
+                    "fraction common edges: 0, as relevant graph is empty\n")
 
     @staticmethod
     def write_output(Grelevant, Girrelevant, k):
         Util.compare_graph(Girrelevant, Grelevant, k)
         nx.write_edgelist(Grelevant, 'logs/relevant-edges-' + str(k) + '.txt')
-        nx.write_edgelist(Girrelevant, 'logs/irrelevant-edges-' + str(k) + '.txt')
+        nx.write_edgelist(Girrelevant,
+                          'logs/irrelevant-edges-' + str(k) + '.txt')
+
+    @staticmethod
+    def plot_recall(csv_file, batch_size, klist, save_file=None):
+        df = pd.read_csv(csv_file)
+        df = df[df['Relevant Count'] >= 10]
+        fig, ax = plt.subplots(figsize=(7, 4))
+        plt.ylim(0, 1)
+        ax.yaxis.grid()
+        plt.title(f"Batch-wise Recall value (batch size = {batch_size})")
+        plt.xlabel('Batch Index')
+        plt.ylabel('Recall')
+        x = df['Age'].unique()
+        plt.xticks(np.arange(1, x[-1] + 1))
+        for k in klist:
+            ax.plot(x, df[df['K'] == k]['Recall'], label=f'K = {k}',
+                    marker='o')
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.tight_layout()
+        if save_file is not None:
+            plt.savefig(save_file)
+        plt.show()
+
