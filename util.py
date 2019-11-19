@@ -10,15 +10,15 @@ stopWords = set(stopwords.words('english'))
 
 
 class Util:
-    @staticmethod
-    def score_tweet(outputFile, edges, G):
-        score = 0
-        for edge in edges:
-            if edge in G.edges():
-                outputFile.write(','.join(edge) + " : " + str(
-                    G[edge[0]][edge[1]]['weight']) + '\n')
-                score += G[edge[0]][edge[1]]['weight']
-        return score
+    # @staticmethod
+    # def score_tweet(outputFile, edges, G):
+    #     score = 0
+    #     for edge in edges:
+    #         if edge in G.edges():
+    #             outputFile.write(','.join(edge) + " : " + str(
+    #                 G[edge[0]][edge[1]]['weight']) + '\n')
+    #             score += sum(G[edge[0]][edge[1]]['weight'].values())
+    #     return score
 
     @staticmethod
     def sanitize(tokens):
@@ -56,6 +56,11 @@ class Util:
         return True
 
     @staticmethod
+    def get_windows(tokens, window_size):
+        windows = [tokens[ (i - window_size) : (i + window_size + 1) ] for i in range(window_size, len(tokens) - window_size)]
+        return windows
+
+    @staticmethod
     def compare_graph(Girrelevant, Grelevant, k):
         with open('logs/comparison-' + str(k) + '.txt', 'w') as outputFile:
             nodeCount = 0
@@ -68,10 +73,16 @@ class Util:
                 if edge in Girrelevant.edges():
                     edgeCount += 1
                     outputFile.write("Common edge: " + ','.join(edge) + '\n')
-            outputFile.write("fraction common nodes: " + str(
-                nodeCount / len(Grelevant.nodes())) + '\n')
-            outputFile.write("fraction common edges: " + str(
-                edgeCount / len(Grelevant.edges())) + '\n')
+            if len(Grelevant.nodes()) > 0:
+                outputFile.write("fraction common nodes: " + str(
+                    nodeCount / len(Grelevant.nodes())) + '\n')
+            else:
+                outputFile.write("fraction common nodes: 0, as relevant graph is empty\n")
+            if len(Grelevant.edges()) > 0:
+                outputFile.write("fraction common edges: " + str(
+                    edgeCount / len(Grelevant.edges())) + '\n')
+            else: 
+                outputFile.write("fraction common edges: 0, as relevant graph is empty\n")
 
 
 

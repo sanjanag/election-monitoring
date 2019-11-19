@@ -1,5 +1,7 @@
 import operator
 import json
+import csv
+import math
 
 class RankingEngine:
     def __init__(self, k):
@@ -7,19 +9,35 @@ class RankingEngine:
         pass
 
     @staticmethod
-    def get_score(tweet):
-        return tweet.rscore - tweet.irscore
+    def get_score(tweet,baseline):
+        if baseline == "b1":
+            return tweet.rscore - tweet.irscore ######## B1
+        elif baseline == 'b2':
+            return tweet.rscore ######### B2
+        elif baseline == 'b3':
+            if tweet.rscore == 0:
+                return 0
+            elif tweet.irscore == 0:
+                print("What the fuck!!!!!")
+                return 0
+            return math.log(tweet.rscore/tweet.irscore)
+        elif baseline == 'b4':
+            return 0
 
     @staticmethod
-    def rank(batch, age):
-        with open('logs/ranked-list-' + str(age) + '.txt', 'w') as outputFile:
+    def rank(batch, age, baseline):
+        with open('logs/ranked-list-' + str(age) + '.csv', 'w') as outputFile:
             for tweet in batch:
-                tweet.rank_score = RankingEngine.get_score(tweet)
-            ranked_batch = sorted(batch, key=operator.attrgetter('rank_score'),
+                tweet.rank_score = RankingEngine.get_score(tweet,baseline)
+            if baseline == 'b4':
+                ranked_batch = sorted(batch, key= lambda tweet: (-tweet.rscore, tweet.irscore) )
+            else: 
+                ranked_batch = sorted(batch, key=operator.attrgetter('rank_score'),
                                   reverse=True)
+            outputWriter = csv.writer(outputFile)
+            outputWriter.writerow(["Text","timestamp","status","rank_score","rscore","irscore",'edges'])
             for tweet in ranked_batch:
-                outputFile.write(json.dumps(tweet.__dict__, default=str))
-                outputFile.write('\n')
+                outputWriter.writerow([tweet.text,tweet.timestamp,tweet.status,tweet.rank_score,tweet.rscore,tweet.irscore,tweet.edges])
             return ranked_batch
 
     @staticmethod
@@ -29,17 +47,17 @@ class RankingEngine:
                 ranked_batch)
             outputFile.write("New batch, age is: " + str(age) + " Batch contains " + str(total_relevant) + " relevant tweets\n")
             if (total_relevant == 0):
-                outputFile.write("Batch contains no relevant tweets, skipping metric analysis")
+                outputFile.write("Batch contains no relevant tweets, skipping metric analysis\n")
                 return []
             metrics = {}
-            for k in range(10, len(ranked_batch), 10):
+            for k in range(1000, len(ranked_batch)+1, 1000):
                 num_relevant, num_irrelevant = RankingEngine.count_labels(
                     ranked_batch[:k])
                 metrics[k] = [
                     RankingEngine.recall(num_relevant, total_relevant, k),
                     RankingEngine.specificity(num_irrelevant, total_irrelevant)]
                 outputFile.write("Age: " + str(age) + " K: " + str(k) + " Recall: " + str(metrics[k][0]) + '\n')
-                if metrics[k][0] == 1.0:
+                if metrics[k][0] == 1.0 and k > total_relevant:
                     break
             return metrics
 
