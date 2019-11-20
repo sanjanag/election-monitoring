@@ -61,20 +61,20 @@ class Model():
             rscore = 0
             irscore = 0
             if edge in self.gr.graph.edges():
-                rscore = sum(self.gr.graph[edge[0]][edge[1]]['weight'].values())
-                # if not self.decayflag:
-                #     rscore = sum(self.gr.graph[edge[0]][edge[1]]['weight'].values())
-                # else:
-                #     rscore = self.gr.get_decay_value(edge, curr_age)
-                #     print('decay score ', rscore)
-                #     print('at age ', curr_age)
+            #     rscore = sum(self.gr.graph[edge[0]][edge[1]]['weight'].values())
+                if not self.decayflag == 'True':
+                    rscore = sum(self.gr.graph[edge[0]][edge[1]]['weight'].values())
+                else:
+                    rscore = self.gr.get_decay_value(edge, self.age+1)
+                    # print('decay score ', rscore)
+                    # print('at age ', curr_age)
             else:
                 rscore = 0
             if edge in self.gir.graph.edges():
                 if not self.decayflag == 'True':
                     irscore = sum(self.gir.graph[edge[0]][edge[1]]['weight'].values())
                 else:
-                    irscore = self.gir.get_decay_value(edge, self.age)
+                    irscore = self.gir.get_decay_value(edge, self.age+1)
                     # print(edge)
                     # print('decay score ', irscore)
                     # print('at age ', self.age)
@@ -99,6 +99,7 @@ class Model():
 
     def get_ranking_metrics(self, batch, age):
         ranked_batch = RankingEngine.rank(batch, age, self.baseline)
+        RankingEngine.compute_NDCG(ranked_batch, age)
         return RankingEngine.eval(ranked_batch, age)
 
     def run(self):

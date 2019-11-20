@@ -62,6 +62,27 @@ class RankingEngine:
             return metrics
 
     @staticmethod
+    def compute_NDCG(ranked_batch, age):
+        with open('logs/ndcg.txt','a') as outputFile:
+            total_relevant, total_irrelevant = RankingEngine.count_labels(
+                ranked_batch)
+            outputFile.write("New batch, age is: " + str(age) + " Batch contains " + str(total_relevant) + " relevant tweets\n")
+            DCG = 0
+            nf = 0
+            scoreList = [tweet.label for tweet in ranked_batch]
+            for j in range(len(scoreList)):
+                DCG += float(scoreList[j])/math.log(max(j,2),2)
+            outputFile.write('#NDCG DCG is found to be: ' + str(DCG) + '\n')
+            newlist = sorted(scoreList,reverse=True)
+            if DCG > 0:
+                for j in range(len(scoreList)):
+                    nf += float(newlist[j])/math.log(max(j,2),2)
+                outputFile.write('#NDCG normalisation factor is: ' + str(nf) + '\n')
+                outputFile.write('Age: ' + str(age) + " NDCG: " + str(DCG/nf) + '\n')
+            else:
+                return 0
+
+    @staticmethod
     def count_labels(tweets):
         num_relevant = 0
         num_irrelevant = 0
