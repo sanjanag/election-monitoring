@@ -16,3 +16,6 @@ logs
 complete-*
 *.pyc
 new-csv-data
+with-decay
+ndcg*
+edge-window
