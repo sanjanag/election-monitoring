@@ -111,10 +111,11 @@ class Util:
         plt.title(f"Batch-wise Recall value (batch size = {batch_size})")
         plt.xlabel('Batch Index')
         plt.ylabel('Recall')
-        x = df['Age'].unique()
-        plt.xticks(np.arange(1, x[-1] + 1))
+        xticks = np.arange(1, df['Age'].max() + 1)
+        plt.xticks(xticks)
         for k in klist:
-            ax.plot(x, df[df['K'] == k]['Recall'], label=f'K = {k}',
+            tmp_df = df[['Age', 'Recall', 'K']][df['K'] == k]
+            ax.plot(tmp_df['Age'], tmp_df['Recall'], label=f'K = {k}',
                     marker='o')
         ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.tight_layout()
@@ -122,3 +123,6 @@ class Util:
             plt.savefig(save_file)
         plt.show()
 
+if __name__ == "__main__":
+    Util.plot_recall("./logs/plot-metrics.csv", 10000,
+                     [1000, 3000, 5000, 7000], "recall.png")
