@@ -80,6 +80,7 @@ class Model():
                     # print('at age ', self.age)
             else: 
                 irscore = 0
+            tweet.edgedict[edge] = [rscore,irscore]
             if not rscore == 0 or not irscore == 0:
                 edgerscore += rscore/(rscore+irscore)
                 edgeirscore += irscore/(rscore+irscore)

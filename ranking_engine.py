@@ -25,6 +25,15 @@ class RankingEngine:
             return 0
 
     @staticmethod
+    def get_edges_list(edgedict):
+        outputlist = []
+        for key in edgedict.keys():
+            if edgedict[key][0] > 0 or edgedict[key][1] > 0:
+                outputlist.append(key)
+                outputlist.append(edgedict[key][0])
+                outputlist.append(edgedict[key][1])
+        return outputlist
+    @staticmethod
     def rank(batch, age, baseline):
         with open('logs/ranked-list-' + str(age) + '.csv', 'w') as outputFile:
             for tweet in batch:
@@ -35,9 +44,10 @@ class RankingEngine:
                 ranked_batch = sorted(batch, key=operator.attrgetter('rank_score'),
                                   reverse=True)
             outputWriter = csv.writer(outputFile)
-            outputWriter.writerow(["Text","timestamp","status","rank_score","rscore","irscore",'edges'])
+            outputWriter.writerow(["Text","timestamp","status","rank_score","rscore","irscore",'edge','rscore','irscore'])
             for tweet in ranked_batch:
-                outputWriter.writerow([tweet.text,tweet.timestamp,tweet.status,tweet.rank_score,tweet.rscore,tweet.irscore,tweet.edges])
+                outputlist = RankingEngine.get_edges_list(tweet.edgedict)
+                outputWriter.writerow([tweet.text,tweet.timestamp,tweet.status,tweet.rank_score,tweet.rscore,tweet.irscore]+outputlist)
             return ranked_batch
 
     @staticmethod

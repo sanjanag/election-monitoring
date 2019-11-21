@@ -12,6 +12,7 @@ class Tweet:
         self.rscore = 0
         self.irscore = 0
         self.edges = []
+        self.edgedict = {}
         # can use more args if required
 
     def __repr__(self):
