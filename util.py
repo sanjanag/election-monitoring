@@ -63,22 +63,36 @@ class Util:
             return False
         return True 
 
+
+    @staticmethod
+    def select_edges(token, windowed_subtext, window_size):
+        edges = []
+        for edge in combinations(windowed_subtext, window_size):
+            if token in edge:
+                edges.append(edge)
+        return edges
+
     @staticmethod
     def get_windowed_edges(tokens, window_size):
         
         edge_set = []
-        for i in range(window_size, len(tokens) - window_size):
+        n = len(tokens)
+        for i in range(window_size, n - window_size):
             windowed_subtext = tokens[(i - window_size): (i + window_size + 1)]
-            
-            edges = []
-            for edge in combinations(windowed_subtext, 2):
-                if tokens[i] in edge:
-                    edges.append(edge)
-
+            edges = Util.select_edges(tokens[i], windowed_subtext, window_size)
             edge_set.append(edges)
+
+        pre_window_subtext = combinations(tokens[0 : window_size+1], window_size)
+        post_window_subtext = combinations(tokens[n - window_size : n + 1], window_size)
+        edge_set.append(pre_window_subtext)
+        edge_set.append(post_window_subtext)
 
         edges = [i for sublist in edge_set for i in sublist]
         edges = list(set(edges))        
+
+        print(tokens)
+        print(edges)
+
         return edges
 
     @staticmethod
