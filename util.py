@@ -89,10 +89,6 @@ class Util:
 
         edges = [i for sublist in edge_set for i in sublist]
         edges = list(set(edges))        
-
-        print(tokens)
-        print(edges)
-
         return edges
 
     @staticmethod
