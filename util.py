@@ -6,6 +6,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from nltk.corpus import stopwords
+from itertools import combinations
 
 punctuations = "!\"(),-./:;<=>?[\\]^_`{|}~'"
 refinedPunctuations = ",|\.|;"
@@ -60,13 +61,25 @@ class Util:
         if len(token) <= 1 or token.startswith('@') or token.startswith(
                 'http'):  # remove urls and @ mentions
             return False
-        return True
+        return True 
 
     @staticmethod
-    def get_windows(tokens, window_size):
-        windows = [tokens[(i - window_size): (i + window_size + 1)] for i in
-                   range(window_size, len(tokens) - window_size)]
-        return windows
+    def get_windowed_edges(tokens, window_size):
+        
+        edge_set = []
+        for i in range(window_size, len(tokens) - window_size):
+            windowed_subtext = tokens[(i - window_size): (i + window_size + 1)]
+            
+            edges = []
+            for edge in combinations(windowed_subtext, 2):
+                if tokens[i] in edge:
+                    edges.append(edge)
+
+            edge_set.append(edges)
+
+        edges = [i for sublist in edge_set for i in sublist]
+        edges = list(set(edges))        
+        return edges
 
     @staticmethod
     def compare_graph(Girrelevant, Grelevant, k):
