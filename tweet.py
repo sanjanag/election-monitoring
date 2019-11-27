@@ -1,5 +1,7 @@
-from util import Util
 from itertools import combinations
+
+from util import Util
+
 
 class Tweet:
     def __init__(self, args):
@@ -7,6 +9,8 @@ class Tweet:
         self.timestamp = args['authored_at']
         self.status = 'Y' if isinstance(args['relevant'], str) else None
         self.label = 1 if self.status == 'Y' else 0
+        self.category = args['incident_category'] if isinstance(
+            args['incident_category'], str) else 'Others'
         self.predictedlabel = 0
         self.rank_score = 0
         self.rscore = 0
@@ -30,15 +34,15 @@ class Tweet:
     def setrankscore(self, rankscore):
         self.rank_score = rankscore
 
-    def setpredictedlabel(label):
-        self.predictedlabel = label
-
-    def getpredictedlabel(label):
-        return self.predictedlabel
+    # def setpredictedlabel(label):
+    #     self.predictedlabel = label
+    #
+    # def getpredictedlabel(label):
+    #     return self.predictedlabel
 
     def set_edges(self):
         try:
-           tokens = Util.tokenize(self.text)
+            tokens = Util.tokenize(self.text)
         except TypeError as e:
             print("Found typeerror, tweet will be ignored")
             return []
@@ -51,4 +55,3 @@ class Tweet:
         edges = [i for sublist in edge_set for i in sublist]
         edges = list(set(edges))
         self.edges = edges
-
