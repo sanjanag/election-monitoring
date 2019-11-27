@@ -6,9 +6,10 @@ from tweet import Tweet
 class Simulator:
 
     def __init__(self, tweet_csv="./test.csv", start_id=0):
-        self.tweets_df = pd.read_csv(tweet_csv, parse_dates=['authored_at'])
+        self.tweets_df = pd.read_csv(tweet_csv, parse_dates=['authored_at'],
+                                     low_memory=False)
         self.tweets_df = self.tweets_df.sort_values(by=['authored_at'])
-        self.tweets_df[self.tweets_df['source'] == 'Twitter']
+        self.tweets_df = self.tweets_df[self.tweets_df['source'] == 'Twitter']
         self.tweets_df = self.tweets_df.drop(columns=['source'])
 
         self.next_id = start_id
