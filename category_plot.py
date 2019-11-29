@@ -7,11 +7,10 @@ csv_files = glob.glob("./logs/ranked-list*")
 csv_files.sort()
 
 # concatenate batches
-K = 1000
 df_list = []
 fields = ['Text', 'timestamp', 'status', 'rank_score', 'incident_category']
 for i, f in enumerate(csv_files):
-    df = pd.read_csv(f, usecols=fields).head(K)
+    df = pd.read_csv(f, usecols=fields)
     df['batch'] = i + 1
     df_list.append(df)
 df = pd.concat(df_list)
@@ -23,8 +22,12 @@ df_count = df.pivot_table('counts', ['batch'], 'incident_category',
                           fill_value=0)
 df_count = df_count.drop(columns=['Others'])
 
+df_count = df_count[
+    ['Ballot Snatching', 'Delayed Logistics', 'Election Irregularity', 'Fraud',
+     'Results', 'Violence']]
+
 # plot
 df_count.plot(kind='barh', stacked=True, figsize=(10, 7))
-plt.title("Category count for first 1000 tweets in each ranked batch")
+plt.title("Count of categories across batches")
 plt.xlabel("Count")
-plt.savefig(f'category_{K}.png')
+plt.savefig('category_chart.png')
