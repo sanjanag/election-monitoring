@@ -1,5 +1,3 @@
-from itertools import combinations
-
 from util import Util
 
 
@@ -48,10 +46,5 @@ class Tweet:
             return []
 
         window_size = 2
-        edge_set = []
-        for windowed_subtext in Util.get_windows(tokens, window_size):
-            edge_set.append(list(combinations(windowed_subtext, 2)))
-
-        edges = [i for sublist in edge_set for i in sublist]
-        edges = list(set(edges))
+        edges = Util.get_windowed_edges(tokens, window_size)
         self.edges = edges

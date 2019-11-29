@@ -6,6 +6,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from nltk.corpus import stopwords
+from itertools import combinations
 
 punctuations = "!\"(),-./:;<=>?[\\]^_`{|}~'"
 refinedPunctuations = ",|\.|;"
@@ -60,13 +61,38 @@ class Util:
         if len(token) <= 1 or token.startswith('@') or token.startswith(
                 'http'):  # remove urls and @ mentions
             return False
-        return True
+        return True 
+
 
     @staticmethod
-    def get_windows(tokens, window_size):
-        windows = [tokens[(i - window_size): (i + window_size + 1)] for i in
-                   range(window_size, len(tokens) - window_size)]
-        return windows
+    def select_edges(token, windowed_subtext):
+        edges = []
+        for edge in combinations(windowed_subtext, 2):
+            if token in edge:
+                edges.append(edge)
+        return edges
+
+    @staticmethod
+    def get_windowed_edges(tokens, window_size):
+        edge_set = []
+        n = len(tokens)
+
+        if (window_size == 0) or ((n-1)/2 < window_size):
+            edges = list(set(combinations(tokens, 2)))
+        else:
+            for i in range(window_size, n - window_size):
+                windowed_subtext = tokens[(i - window_size): (i + window_size + 1)]
+                edges = Util.select_edges(tokens[i], windowed_subtext)
+                edge_set.append(edges)
+
+            pre_window_subtext = combinations(tokens[0 : window_size+1], 2)
+            post_window_subtext = combinations(tokens[n - window_size : n + 1], 2)
+            edge_set.append(pre_window_subtext)
+            edge_set.append(post_window_subtext)
+
+            edges = [i for sublist in edge_set for i in sublist]
+            edges = list(set(edges))        
+        return edges
 
     @staticmethod
     def compare_graph(Girrelevant, Grelevant, k):
