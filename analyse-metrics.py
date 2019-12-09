@@ -29,5 +29,5 @@ for folder in inputFolders:
                     outputWriter.writerow(
                         [line[1], line[3], line[5], relevantcount])
 
-Util.plot_recall("./logs/plot-metrics.csv", 10000, [1000, 3000, 5000, 7000],
+Util.plot_recall("./logs/plot-metrics.csv", 10000, [1000, 2000, 3000, 5000],
                  "recall.png")

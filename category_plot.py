@@ -27,7 +27,8 @@ df_count = df_count[
      'Results', 'Violence']]
 
 # plot
-df_count.plot(kind='barh', stacked=True, figsize=(10, 7))
+df_count.plot(kind='bar', stacked=True, figsize=(10, 7))
 plt.title("Count of categories across batches")
-plt.xlabel("Count")
+plt.ylabel("Count")
+plt.xlabel("Batch Index")
 plt.savefig('category_chart.png')
